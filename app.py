@@ -31,24 +31,29 @@ def generate_plan():
         date = data.get("date")
         budget= data.get("budget")
         preferences = data.get("preferences", [])
+        pace= data.get("pace")
     else:
         city = request.form.get("city")
         date = request.form.get("date")
         budget = request.form.get("budget", "medium")
+        pace = request.form.get("pace", "medium")
 
         preferences = request.form.getlist("preferences")  
 
     preference_text = ", ".join(preferences) if preferences else "general sightseeing"
 
     prompt = f"""
-    Give me a detailed 1-day travel itinerary for {city} on {date} considering a {budget} budget.
+    Give me a detailed 1-day travel itinerary for {city} on {date}, considering a {budget} budget and a {pace} pace of travel.
     Include:
     - Timings
     - Places to visit
     - Local food recommendations
     - Estimated cost of each activity (entry tickets, meals, transport)
-    Also add a total estimated cost at the end.
+    - Ensure the number of places and travel involved aligns with a {pace} day
+
+    At the end, provide a total estimated cost.
     """
+
 
     response = model.generate_content(prompt)
     plan = response.text
