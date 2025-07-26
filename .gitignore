@@ -1,0 +1,53 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment variables
+.env
+.env.*
+
+# Flask stuff
+instance/
+.webassets-cache
+
+# Logs and database
+*.log
+*.sqlite3
+*.db
+
+# Virtual environment
+venv/
+env/
+ENV/
+.venv/
+
+# IDE / editor specific
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# OS generated
+.DS_Store
+Thumbs.db
+
+# PyInstaller
+dist/
+build/
+*.spec
+
+# Markdown or output files
+*.md~
+*.bak
+*.tmp
+
+# Coverage and testing
+.coverage
+.tox/
+.nox/
+htmlcov/
+
+# Node (in case of frontend files)
+node_modules/
+package-lock.json

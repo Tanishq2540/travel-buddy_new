@@ -1,0 +1,148 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AI Travel Buddy</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding-top: 50px;
+            background-color: #030303ff;
+        }
+        .container {
+            max-width: 1300px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 0 10px rgba(160, 105, 105, 0.1);
+        }
+        .plan-output {
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 16px;
+            line-height: 1.2;
+            white-space: normal; /* Update if you're using HTML now */
+            background-color: #7bd2b8ff;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .plan-output h1,
+        .plan-output h2,
+        .plan-output h3,
+        .plan-output p {
+            margin: 4px 0;
+            line-height: 1.2;
+        }
+
+        .plan-output br {
+            line-height: 0.5;
+        }
+
+        .plan-output ul,
+        .plan-output ol {
+            margin: 0px 0px 0px 20px;
+            padding-left: 20px;
+        }
+
+        .plan-output li {
+            margin: 1px 0;
+        }
+    </style>
+</head>
+
+
+<body>
+      <div class="container">
+        <h2 class="text-center mb-4">🌍 AI Travel Plan Generator</h2>
+
+        <form method="post" action="/generate-plan">
+            <div class="mb-3">
+                <label for="city" class="form-label">Enter City</label>
+                <input type="text" class="form-control" id="city" name="city" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="date" class="form-label">Select Travel Date</label>
+                <input type="date" class="form-control" id="date" name="date" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Preferences</label><br>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" name="preferences" value="history" id="history">
+                    <label class="form-check-label" for="history">History</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" name="preferences" value="nature" id="nature">
+                    <label class="form-check-label" for="nature">Nature</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" name="preferences" value="food" id="food">
+                    <label class="form-check-label" for="food">Food</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" name="preferences" value="shopping" id="shopping">
+                    <label class="form-check-label" for="shopping">Shopping</label>
+                </div>
+                <div class="mb-3">
+                <label for="budget" class="form-label">Select your budget:</label>
+                <select class="form-select" name="budget" id="budget">
+                    <option value="low">Low</option>
+                    <option value="medium" selected>Medium</option>
+                    <option value="high">High</option>
+                </select>
+                </div>
+            </div>
+
+            <div class="text-center">
+                <button type="submit" class="btn btn-primary">Generate Plan</button>
+            </div>
+        </form>
+
+        {% if plan %}
+            <div class="plan-output mt-4">
+                <h5>Your AI Travel Plan:</h5>
+                <div>{{ plan | safe }}</div>
+            </div>
+        {% endif %}
+    </div>
+    <div id="map" style="height: 400px; margin-top: 20px;"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+   <script>
+  async function initMap() {
+    const city = "{{ city }}";
+    if (!city) {
+      console.warn("City not provided for map.");
+      return;
+    }
+
+    const geocoder = new google.maps.Geocoder();
+
+    geocoder.geocode({ address: city }, function(results, status) {
+      if (status === 'OK') {
+        const map = new google.maps.Map(document.getElementById('map'), {
+          center: results[0].geometry.location,
+          zoom:8    
+        });
+
+        new google.maps.Marker({
+          map: map,
+          position: results[0].geometry.location
+        });
+      } else {
+        console.error("Geocode error:", status);
+      }
+    });
+  }
+</script>
+
+<script
+  src="https://maps.googleapis.com/maps/api/js?key={{ api_key }}&callback=initMap"
+  async defer>
+</script>
+</body>
+</html>
