@@ -22,40 +22,27 @@
             font-family: 'Segoe UI', sans-serif;
             font-size: 16px;
             line-height: 1.2;
-            white-space: normal; /* Update if you're using HTML now */
             background-color: #7bd2b8ff;
             padding: 20px;
             border-radius: 8px;
             margin-top: 20px;
         }
-
-        .plan-output h1,
-        .plan-output h2,
-        .plan-output h3,
-        .plan-output p {
+        .plan-output h1, .plan-output h2, .plan-output h3, .plan-output p {
             margin: 4px 0;
             line-height: 1.2;
         }
-
-        .plan-output br {
-            line-height: 0.5;
-        }
-
-        .plan-output ul,
-        .plan-output ol {
+        .plan-output ul, .plan-output ol {
             margin: 0px 0px 0px 20px;
             padding-left: 20px;
         }
-
         .plan-output li {
             margin: 1px 0;
         }
     </style>
 </head>
 
-
 <body>
-      <div class="container">
+    <div class="container">
         <h2 class="text-center mb-4">🌍 AI Travel Plan Generator</h2>
 
         <form method="post" action="/generate-plan">
@@ -88,12 +75,12 @@
                     <label class="form-check-label" for="shopping">Shopping</label>
                 </div>
                 <div class="mb-3">
-                <label for="budget" class="form-label">Select your budget:</label>
-                <select class="form-select" name="budget" id="budget">
-                    <option value="low">Low</option>
-                    <option value="medium" selected>Medium</option>
-                    <option value="high">High</option>
-                </select>
+                    <label for="budget" class="form-label">Select your budget:</label>
+                    <select class="form-select" name="budget" id="budget">
+                        <option value="low">Low</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="high">High</option>
+                    </select>
                 </div>
             </div>
 
@@ -108,41 +95,78 @@
                 <div>{{ plan | safe }}</div>
             </div>
         {% endif %}
+
     </div>
+
     <div id="map" style="height: 400px; margin-top: 20px;"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-   <script>
-  async function initMap() {
-    const city = "{{ city }}";
-    if (!city) {
-      console.warn("City not provided for map.");
-      return;
-    }
 
-    const geocoder = new google.maps.Geocoder();
+    <script>
+        async function initMap() {
+            const city = "{{ city }}";
+            if (!city) {
+                console.warn("City not provided for map.");
+                return;
+            }
 
-    geocoder.geocode({ address: city }, function(results, status) {
-      if (status === 'OK') {
-        const map = new google.maps.Map(document.getElementById('map'), {
-          center: results[0].geometry.location,
-          zoom:8    
+            const places = {{ places | tojson }};
+            const geocoder = new google.maps.Geocoder();
+
+            geocoder.geocode({ address: city }, function (results, status) {
+                if (status === 'OK') {
+                    const map = new google.maps.Map(document.getElementById('map'), {
+                        center: results[0].geometry.location,
+                        zoom: 8
+                    });
+
+                    places.forEach((place, index) => {
+                        setTimeout(() => {
+                            geocoder.geocode({ address: place }, function (results, status) {
+                                if (status === 'OK') {
+                                    const marker = new google.maps.Marker({
+                                        map: map,
+                                        position: results[0].geometry.location,
+                                        title: place
+                                    });
+
+                                    const infowindow = new google.maps.InfoWindow({
+                                        content: `<strong>${place}</strong>`
+                                    });
+
+                                    marker.addListener('click', () => {
+                                        infowindow.open(map, marker);
+                                    });
+                                } else {
+                                    console.error("Geocode error for", place, status);
+                                }
+                            });
+                        }, index * 200);  // Delay for batching if needed
+                    });
+                } else {
+                    console.error("City geocoding failed:", status);
+                }
+            });
+        }
+    </script>
+
+    {% if plan %}
+    <script>
+        window.addEventListener('load', () => {
+            const mapDiv = document.getElementById('map');
+            if (mapDiv) {
+                window.scrollTo({
+                    top: mapDiv.offsetTop - 50,
+                    behavior: 'smooth'
+                });
+            }
         });
+    </script>
+    {% endif %}
 
-        new google.maps.Marker({
-          map: map,
-          position: results[0].geometry.location
-        });
-      } else {
-        console.error("Geocode error:", status);
-      }
-    });
-  }
-</script>
-
-<script
-  src="https://maps.googleapis.com/maps/api/js?key={{ api_key }}&callback=initMap"
-  async defer>
-</script>
+    <script
+      src="https://maps.googleapis.com/maps/api/js?key={{ api_key }}&callback=initMap"
+      async defer>
+    </script>
 </body>
 </html>

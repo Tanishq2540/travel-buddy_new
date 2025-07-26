@@ -3,6 +3,7 @@ import google.generativeai as genai
 import os
 from dotenv import load_dotenv
 import markdown
+from place_extract import extract_candidate_places, validate_places_with_maps_api
 
 
 load_dotenv()
@@ -20,7 +21,7 @@ app = Flask(__name__)
 app.config["GEMINI_API_KEY"] = api_key
 @app.route("/", methods=["GET"])
 def index():
-    return render_template("index.html")
+    return render_template("index.html", plan=None, city=None, places=[], api_key=app.config['GEMINI_API_KEY'])
 
 @app.route("/generate-plan", methods=["POST"])
 def generate_plan():
@@ -51,12 +52,14 @@ def generate_plan():
 
     response = model.generate_content(prompt)
     plan = response.text
+    raw_places = extract_candidate_places(plan)
+    places = validate_places_with_maps_api(raw_places, city)
     html_plan = markdown.markdown(plan, extensions=["extra", "nl2br"])
 
     if request.is_json:
         return jsonify({"plan": html_plan}) 
     else:
-        return render_template("index.html", plan=html_plan, city=city, api_key=app.config['GEMINI_API_KEY'])
+        return render_template("index.html", plan=html_plan, city=city, places=places or [], api_key=app.config['GEMINI_API_KEY'])
 
 
 if __name__ == "__main__":
