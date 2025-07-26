@@ -4,6 +4,7 @@ import os
 from dotenv import load_dotenv
 import markdown
 from place_extract import extract_candidate_places, validate_places_with_maps_api
+from weather_utils import get_weather
 
 
 load_dotenv()
@@ -25,6 +26,7 @@ def index():
 
 @app.route("/generate-plan", methods=["POST"])
 def generate_plan():
+    weather_summary = ""
     if request.is_json:
         data = request.get_json()
         city = data.get("city")
@@ -32,6 +34,14 @@ def generate_plan():
         budget= data.get("budget")
         preferences = data.get("preferences", [])
         pace= data.get("pace")
+        weather = get_weather(city)
+        if weather:
+            weather_summary = (
+                f"\nThe weather forecast for {city} is as follows:\n"
+                f"- Condition: {weather['description']}\n"
+                f"- Temperature: {weather['temperature']}°C (feels like {weather['feels_like']}°C)\n"
+                f"- Humidity: {weather['humidity']}%\n\n"
+            )
     else:
         city = request.form.get("city")
         date = request.form.get("date")
@@ -43,16 +53,30 @@ def generate_plan():
     preference_text = ", ".join(preferences) if preferences else "general sightseeing"
 
     prompt = f"""
-    Give me a detailed 1-day travel itinerary for {city} on {date}, considering a {budget} budget and a {pace} pace of travel.
-    Include:
-    - Timings
-    - Places to visit
-    - Local food recommendations
-    - Estimated cost of each activity (entry tickets, meals, transport)
-    - Ensure the number of places and travel involved aligns with a {pace} day
+    You're an AI travel planner.
 
-    At the end, provide a total estimated cost.
+    Create a **detailed 1-day itinerary** for a trip to **{city}** on **{date}**, keeping in mind:
+    - **Budget**: {budget}
+    - **User preferences**: {", ".join(preferences) if preferences else "general sightseeing"}
+    - **Preferred pace**: {pace} day (e.g., relaxing, medium, or hectic)
+
+    {weather_summary}
+
+    Your response must include:
+    - A short introduction and projected weather summary
+    - Timings for each activity
+    - Recommended places to visit (historical, cultural, nature, etc.)
+    - Local food/restaurant suggestions (preferably near the attractions)
+    - Approximate cost estimates for:
+        - Entry tickets
+        - Meals
+        - Local transport
+    - A total estimated cost at the end
+
+    Make sure all activities align with the **weather**, **budget**, and **day pace**.
+    Avoid overly generic suggestions. Prioritize realistic, local experiences.
     """
+
 
 
     response = model.generate_content(prompt)
