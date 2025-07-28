@@ -10,19 +10,28 @@ from weather_utils import get_weather
 load_dotenv()
 
 
-api_key = os.getenv("GEMINI_API_KEY")
-if not api_key:
-    raise ValueError("GEMINI_API_KEY not found in environment variables.")
-genai.configure(api_key=api_key)
+gcp_api_key = os.getenv("GCP_API_KEY")
+gemini_api_key = os.getenv("GEMINI_API_KEY")
+weather_api_key = os.getenv("WEATHER_API_KEY")
 
+if not gcp_api_key:
+    raise ValueError("GCP_API_KEY not found.")
+if not gemini_api_key:
+    raise ValueError("GEMINI_API_KEY not found.")
+if not weather_api_key:
+    raise ValueError("WEATHER_API_KEY not found.")
 
+genai.configure(api_key=gemini_api_key)
 model = genai.GenerativeModel("gemini-1.5-flash")
 
 app = Flask(__name__)
-app.config["GEMINI_API_KEY"] = api_key
+app.config["GCP_API_KEY"] = gcp_api_key
+app.config["GEMINI_API_KEY"] = gemini_api_key
+app.config["WEATHER_API_KEY"] = weather_api_key
 @app.route("/", methods=["GET"])
 def index():
-    return render_template("index.html", plan=None, city=None, places=[], api_key=app.config['GEMINI_API_KEY'])
+    
+    return render_template("index.html", plan=None, city=None, places=[], api_key=app.config['GCP_API_KEY'])
 
 @app.route("/generate-plan", methods=["POST"])
 def generate_plan():
@@ -88,8 +97,8 @@ def generate_plan():
     if request.is_json:
         return jsonify({"plan": html_plan}) 
     else:
-        return render_template("index.html", plan=html_plan, city=city, places=places or [], api_key=app.config['GEMINI_API_KEY'])
-
+        print(f"DEBUG: Key being used is: {app.config['GCP_API_KEY']}") 
+        return render_template("index.html", plan=html_plan, city=city, places=places or [], api_key=app.config['GCP_API_KEY'])
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))

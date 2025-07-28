@@ -1,8 +1,10 @@
 import re
 import requests
 import os
+from dotenv import load_dotenv
+load_dotenv()
 
-GOOGLE_MAPS_API_KEY = os.getenv("GEMINI_API_KEY")
+GOOGLE_MAPS_API_KEY = os.getenv("GCP_API_KEY")
 
 def extract_candidate_places(plan_text):
     """

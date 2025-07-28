@@ -1,7 +1,8 @@
-Flask==3.0.2
-google-cloud-aiplatform==1.44.0
-gunicorn==21.2.0 
-python-dotenv==1.0.1 
+Flask
+google-cloud-aiplatform
+gunicorn
+python-dotenv
 google-generativeai
 markdown
 requests
+python-dotenv
