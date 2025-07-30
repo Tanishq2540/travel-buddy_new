@@ -1,6 +1,6 @@
 Flask
 google-cloud-aiplatform
-gunicorn
+gunicorn==20.1.0
 python-dotenv
 google-generativeai
 markdown
