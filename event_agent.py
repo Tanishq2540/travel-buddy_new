@@ -35,7 +35,7 @@ def fetch_nearby_events(city, start_date, end_date, size=5):
             events.append({
                 "name": event['name'],
                 "url": event['url'],
-                "start_time": event['dates']['start'].get('dateTime', 'N/A'),
+                "date": event['dates']['start'].get('dateTime', 'N/A'),
                 "venue": event['_embedded']['venues'][0]['name'],
                 "location": event['_embedded']['venues'][0]['city']['name'],
             })
